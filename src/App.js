@@ -768,8 +768,8 @@ function App() {
             </tbody>
           </table>
           
-          <div class="footer">Work Done | MasterSoft ERP Solutions Pvt. Ltd.</div>
-          <div class="page-number">2</div>
+          <div class="footer">Work Done | MasterSoft ERP Solutions Pvt. Ltd. | Design and developed by Shivam Kale</div>
+          <div class="page-number">1</div>
         </div>
       </body>
       </html>
@@ -854,7 +854,8 @@ function App() {
       </main>
       
       <footer className="App-footer">
-        <p>© {new Date().getFullYear()} PPT Maker</p>
+        <p>&copy; {new Date().getFullYear()} PPT Maker</p>
+        <p className="credit-text">Design and developed by Shivam Kale</p>
       </footer>
     </div>
   );

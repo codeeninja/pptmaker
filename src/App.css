@@ -137,8 +137,14 @@ table tr:hover {
 
 .App-footer {
   margin-top: 30px;
-  padding: 15px;
+  padding: 20px;
+  text-align: center;
   color: #666;
+}
+
+.credit-text {
+  font-style: italic;
   font-size: 14px;
-  border-top: 1px solid #eee;
+  color: #888;
+  margin-top: 5px;
 }
