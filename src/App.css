@@ -117,6 +117,54 @@ table tr:hover {
   background-color: #f5f5f5;
 }
 
+.format-selector {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.format-label {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.format-options {
+  display: flex;
+  gap: 20px;
+}
+
+.format-options label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.format-options input {
+  margin-right: 8px;
+}
+
+.generate-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.generate-btn:hover {
+  background-color: #45a049;
+}
+
+.generate-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
 .download-btn {
   background-color: #00a4e4;
   color: white;

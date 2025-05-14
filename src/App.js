@@ -9,7 +9,8 @@ function App() {
   const [file, setFile] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [outputFormat, setOutputFormat] = useState('pptx'); // 'pptx' or 'html'
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -618,62 +619,157 @@ function App() {
         console.error('Error reading DOCX file:', err);
         reject(new Error(`Error reading file: ${err.message || 'Unknown error'}`));
       };
-      
       reader.readAsArrayBuffer(file);
     });
   };
 
-  const generateHTML = () => {
-    if (tableData.length === 0) {
-      setError('No data to generate HTML. Please upload a valid file first.');
-      return;
-    }
-    
+  const generatePPTX = () => {
     try {
+      if (!tableData || tableData.length === 0) {
+        setError('No data to generate PowerPoint file. Please upload a file first.');
+        return;
+      }
+
+      // Set loading state
+      setIsLoading(true);
+      setError(null);
+      
+      // Make API call to backend
+      fetch('http://localhost:5000/api/generate-ppt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tableData }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          // Create download using file-saver
+          saveAs(blob, 'WorkDoneStatus.pptx');
+          console.log('PowerPoint file downloaded successfully');
+          setIsLoading(false);
+        })
+        .catch(err => {
+          console.error('Error generating PowerPoint:', err);
+          setError(`Error generating PowerPoint file: ${err.message}`);
+          setIsLoading(false);
+        });
+      
+    } catch (err) {
+      console.error('Error in generatePPTX function:', err);
+      setError(`Error preparing PowerPoint request: ${err.message}`);
+      setIsLoading(false);
+    }
+  };
+
+  const generateHTML = () => {
+    try {
+      if (!tableData || tableData.length === 0) {
+        setError('No data to generate HTML file. Please upload a file first.');
+        return;
+      }
+      
       // Create HTML slide
       let slideHTML = `
       <!DOCTYPE html>
-      <html lang="en">
+      <html>
       <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Work Done Status</title>
+        <meta charset="UTF-8">
         <style>
-          * {
-            box-sizing: border-box;
+          body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-          }
-          body {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 40px;
-            background-color: white;
+            background-color: #FFFFFF;
           }
           .slide {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+            width: 1024px;
+            height: 768px;
             position: relative;
+            margin: 0 auto;
+            padding: 40px;
+            overflow: hidden;
+            box-sizing: border-box;
           }
           .header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
           }
           .title {
-            color: #0B3D91;
+            color: #333333;
             font-size: 36px;
             font-weight: bold;
             text-align: left;
           }
           .logo {
             text-align: right;
+          }
+          .logo-title {
+            color: #00a4e4;
+            font-size: 24px;
+            font-weight: bold;
+          }
+          .logo-subtitle {
+            color: #666666;
+            font-style: italic;
+            font-size: 16px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+          }
+          th, td {
+            border: 1px solid #666666;
+            padding: 10px;
+            text-align: left;
+          }
+          th {
+            background-color: #DDDDDD;
+            font-weight: bold;
+          }
+          .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            color: #666666;
+            font-size: 14px;
+          }
+          .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: #666666;
+            font-size: 18px;
+          }
+          @media print {
+            body {
+              width: 1024px;
+              height: 768px;
+              overflow: hidden;
+            }
+            .slide {
+              page-break-after: always;
+            }
+          }
+        </style>
+    </head>
+    <body>
+      <div class="slide">
+        <div class="header">
+          <h1 class="title">Work Done Status</h1>
+          <div class="logo">
+            <div class="logo-title">MasterSoft</div>
+            <div class="logo-subtitle">Automating Education...</div>
           }
           .logo-title {
             color: #00a4e4;
@@ -846,8 +942,38 @@ function App() {
               </tbody>
             </table>
             
-            <button className="download-btn" onClick={generateHTML}>
-              Download HTML
+            <div className="format-selector">
+              <label className="format-label">Output Format:</label>
+              <div className="format-options">
+                <label>
+                  <input
+                    type="radio"
+                    name="format"
+                    value="pptx"
+                    checked={outputFormat === 'pptx'}
+                    onChange={() => setOutputFormat('pptx')}
+                  />
+                  PowerPoint (.pptx)
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="format"
+                    value="html"
+                    checked={outputFormat === 'html'}
+                    onChange={() => setOutputFormat('html')}
+                  />
+                  HTML
+                </label>
+              </div>
+            </div>
+            
+            <button 
+              className="generate-btn" 
+              onClick={outputFormat === 'pptx' ? generatePPTX : generateHTML}
+              disabled={tableData.length === 0 || isLoading}
+            >
+              Generate Slides
             </button>
           </div>
         )}
